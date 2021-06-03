@@ -15,8 +15,7 @@ TESTBINS=$(patsubst $(TEST)/%.c, $(TESTBIN)/%, $(TESTS))
 LIBDIR=lib
 LIB=$(LIBDIR)/cobs.a
 
-# all:$(LIB)
-all: $(OBJS)
+all:$(LIB)
 
 release: CFLAGS=-Wall -Wextra -O2 -DNDEBUG
 release: clean
