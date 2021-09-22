@@ -20,7 +20,7 @@
 	@param length Number of bytes to encode
 	@param buffer Pointer to encoded output buffer
 	@return Encoded buffer length in bytes (0 on error)
-	@note Does not output delimiter byte
+	@note Encoded data donot include trailing '0'
 */
 size_t cobsEncode(const uint8_t *data, size_t length, uint8_t *buffer)
 {
@@ -47,6 +47,42 @@ size_t cobsEncode(const uint8_t *data, size_t length, uint8_t *buffer)
 	*codep = code; // Write final code value
 
 	return encode - buffer;
+}
+
+/** In-pace COBS encoding
+	@param data Pointer to input data to encode
+	@param length Number of bytes to encode
+	@return Encoded buffer length in bytes (0 on error)
+	@note Encoded data donot include trailing '0'
+	@attention make sure, the size of data to be >= maxCobsEncodedLength(length)
+*/
+size_t cobsInPlaceEncode(uint8_t *data, size_t length)
+{
+    if ((data == NULL) || length == 0)
+    {
+        return 0;
+    }
+
+    memmove((data + 1), data, length);
+    length++;
+    size_t zero_offset_index = 0;
+    while (zero_offset_index < length)
+    {
+        uint8_t offset = 1;
+        for (size_t j = zero_offset_index + 1;
+             j < length && (offset < 255) && data[j] != 0;
+             j++, offset++)
+            ;
+        if (offset == 0xFF)
+        {
+            memmove(data + zero_offset_index + 255, data + zero_offset_index + 254, length - zero_offset_index);
+            length++;
+        }
+        data[zero_offset_index] = offset;
+        zero_offset_index += offset;
+    }
+
+    return length;
 }
 
 /** Inplace decoding of COBS (encoded)data

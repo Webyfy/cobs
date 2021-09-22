@@ -21,6 +21,7 @@ extern "C" {
 
 size_t cobsEncode(const uint8_t *data, size_t length, uint8_t *buffer);
 size_t cobsDecode(const uint8_t *data, size_t length, uint8_t *buffer);
+size_t cobsInPlaceEncode(uint8_t *data, size_t length);
 size_t cobsInPlaceDecode(uint8_t *encoded_data, size_t length);
 size_t maxCobsEncodedLength(size_t data_length);
 
