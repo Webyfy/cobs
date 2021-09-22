@@ -14,16 +14,17 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-size_t cobsEncode(const uint8_t *data, size_t length, uint8_t *buffer);
+size_t cobsEncode(const uint8_t *data, size_t length, uint8_t *buffer, bool trailing_zero);
 size_t cobsDecode(const uint8_t *data, size_t length, uint8_t *buffer);
-size_t cobsInPlaceEncode(uint8_t *data, size_t length);
+size_t cobsInPlaceEncode(uint8_t *data, size_t length, bool trailing_zero);
 size_t cobsInPlaceDecode(uint8_t *encoded_data, size_t length);
-size_t maxCobsEncodedLength(size_t data_length);
+size_t maxCobsEncodedLength(size_t data_length, bool trailing_zero);
 
 #ifdef __cplusplus
 }

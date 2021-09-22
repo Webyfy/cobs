@@ -19,10 +19,10 @@
 	@param data Pointer to input data to encode
 	@param length Number of bytes to encode
 	@param buffer Pointer to encoded output buffer
+    @param tailing_zero flag to include trailing zero in the encoded message
 	@return Encoded buffer length in bytes (0 on error)
-	@note Encoded data donot include trailing '0'
 */
-size_t cobsEncode(const uint8_t *data, size_t length, uint8_t *buffer)
+size_t cobsEncode(const uint8_t *data, size_t length, uint8_t *buffer, bool trailing_zero)
 {
 	if ((data == NULL) || (buffer == NULL)){
 		return 0;
@@ -46,17 +46,23 @@ size_t cobsEncode(const uint8_t *data, size_t length, uint8_t *buffer)
 	}
 	*codep = code; // Write final code value
 
-	return encode - buffer;
+    size_t encoded_length = encode - buffer;
+    if(trailing_zero){
+        buffer[encoded_length] = 0;
+        encoded_length++;
+    }
+
+    return encoded_length;
 }
 
 /** In-pace COBS encoding
 	@param data Pointer to input data to encode
 	@param length Number of bytes to encode
+    @param tailing_zero flag to include trailing zero in the encoded message
 	@return Encoded buffer length in bytes (0 on error)
-	@note Encoded data donot include trailing '0'
-	@attention make sure, the size of data to be >= maxCobsEncodedLength(length)
+	@attention make sure, the size of data to be >= maxCobsEncodedLength(length, traling_zero)
 */
-size_t cobsInPlaceEncode(uint8_t *data, size_t length)
+size_t cobsInPlaceEncode(uint8_t *data, size_t length, bool trailing_zero)
 {
     if ((data == NULL) || length == 0)
     {
@@ -80,6 +86,11 @@ size_t cobsInPlaceEncode(uint8_t *data, size_t length)
         }
         data[zero_offset_index] = offset;
         zero_offset_index += offset;
+    }
+
+    if(trailing_zero){
+        data[length] = 0;
+        length++;
     }
 
     return length;
@@ -139,10 +150,11 @@ size_t cobsInPlaceDecode(uint8_t *encoded_data, size_t length)
  * (excluding trailing 0) from the length of data
  * 
  * @param data_length length of data in bytes
+ * @param trailing_zero flag to include trailing zero for length calculation
  * @return length of encoded message
  */
-size_t maxCobsEncodedLength(size_t data_length)
+size_t maxCobsEncodedLength(size_t data_length, bool trailing_zero)
 {
-	return data_length + data_length / 254 + 1;
+	return data_length + data_length / 254 + 1 + trailing_zero;
 }
 
