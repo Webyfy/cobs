@@ -49,7 +49,7 @@ size_t cobsEncode(const uint8_t *data, size_t length, uint8_t *buffer)
 	return encode - buffer;
 }
 
-/** COBS decode (encoded)data to buffer
+/** Inplace decoding of COBS (encoded)data
  * @param data Pointer to input data to decode
  * @param length Number of bytes to decode
  * @param data Pointer to decoded output data
@@ -57,30 +57,43 @@ size_t cobsEncode(const uint8_t *data, size_t length, uint8_t *buffer)
  * @note Stops decoding if delimiter byte is found
  * @note can't differentiate between error and empty data (when encoded data is {0x01})
 */
-size_t cobsDecode(const uint8_t *data, size_t length, uint8_t *buffer)
+size_t cobsInPlaceDecode(uint8_t *encoded_data, size_t length)
 {
-	if((data==NULL) || (buffer==NULL)){
-		return 0;
-	}
+    if ((encoded_data == NULL))
+    {
+        return 0;
+    }
 
-	const uint8_t *byte = data;			 // Encoded input byte pointer
-	uint8_t *decode = (uint8_t *)buffer; // Decoded output byte pointer
+    if (encoded_data[length - 1] == 0)
+    {
+        length--;
+    }
 
-	for (uint8_t code = 0xff, block = 0; byte < data + length; --block)
-	{
-		if (block) // Decode block byte
-			*decode++ = *byte++;
-		else
-		{
-			if (code != 0xff) // Encoded zero, write it
-				*decode++ = 0;
-			block = code = *byte++; // Next block length
-			if (code == 0x00)		// Delimiter code found
-				break;
-		}
-	}
+    const uint8_t *byte = encoded_data; // Encoded input byte pointer
+    size_t decode_index = 0;
 
-	return decode - (uint8_t *)buffer;
+    for (uint8_t code = 0xff, block = 0; byte < encoded_data + length; --block)
+    {
+        if (block)
+        { // Decode block byte
+            encoded_data[decode_index] = *byte;
+            decode_index++;
+            byte++;
+        }
+        else
+        {
+            if (code != 0xff)
+            {
+                encoded_data[decode_index] = 0;
+                decode_index++;
+            }
+            block = code = *byte++; // Next block length
+            if (code == 0x00)       // Delimiter code found
+                break;
+        }
+    }
+
+    return decode_index;
 }
 
 /**
@@ -96,3 +109,4 @@ size_t maxCobsEncodedLength(size_t data_length)
 {
 	return data_length + data_length / 254 + 1;
 }
+
