@@ -22,12 +22,12 @@ static char *test_sample(const uint8_t *data, size_t data_len, const uint8_t *da
     uint8_t encode_buffer[data_encoded_len];
     size_t len = cobsEncode(data, data_len, encode_buffer, false);
     mu_assert("unexpected encoded data length", len == data_encoded_len);
-    mu_assert("must be equal", memcmp(data_encoded, encode_buffer, data_encoded_len) == 0);
+    mu_assert("unexpected encoded data", memcmp(data_encoded, encode_buffer, data_encoded_len) == 0);
 
     uint8_t decode_buffer[data_encoded_len];
     len = cobsDecode(encode_buffer, data_encoded_len, decode_buffer);
     mu_assert("unexpected decoded data length", len == data_len);
-    mu_assert("must be equal", memcmp(data, decode_buffer, data_len) == 0);
+    mu_assert("unexpected decoded data", memcmp(data, decode_buffer, data_len) == 0);
 
     return 0;
 }
