@@ -8,19 +8,19 @@ int tests_run = 0;
 
 static char *test_encoded_length()
 {
-    mu_assert("wrong encoded length on data length 254", maxCobsEncodedLength(254) == 256);
-    mu_assert("wrong encoded length on data length 255", maxCobsEncodedLength(255) == 257);
-    mu_assert("wrong encoded length on data length 0", maxCobsEncodedLength(0) == 1);
-    mu_assert("wrong encoded length on data length 1", maxCobsEncodedLength(1) == 2);
+    mu_assert("wrong encoded length on data length 254", maxCobsEncodedLength(254, false) == 256);
+    mu_assert("wrong encoded length on data length 255", maxCobsEncodedLength(255, false) == 257);
+    mu_assert("wrong encoded length on data length 0", maxCobsEncodedLength(0, false) == 1);
+    mu_assert("wrong encoded length on data length 1", maxCobsEncodedLength(1, false) == 2);
     return 0;
 }
 
 static char *test_sample(const uint8_t *data, size_t data_len, const uint8_t *data_encoded)
 {
-    size_t data_encoded_len = maxCobsEncodedLength(data_len);
+    size_t data_encoded_len = maxCobsEncodedLength(data_len, false);
 
     uint8_t encode_buffer[data_encoded_len];
-    size_t len = cobsEncode(data, data_len, encode_buffer);
+    size_t len = cobsEncode(data, data_len, encode_buffer, false);
     mu_assert("unexpected encoded data length", len == data_encoded_len);
     mu_assert("must be equal", memcmp(data_encoded, encode_buffer, data_encoded_len) == 0);
 
@@ -56,10 +56,10 @@ static char *test_NULL_encoding()
 {
     uint8_t data[] = {0x1, 0x2, 0x3, 0x4};
     size_t data_len = sizeof(data);
-    uint8_t encode_buffer[maxCobsEncodedLength(data_len)];
+    uint8_t encode_buffer[maxCobsEncodedLength(data_len, false)];
 
-    mu_assert("should return 0 (NULL data)", cobsEncode(NULL, data_len, encode_buffer) == 0);
-    mu_assert("should return 0 (NULL buffer)", cobsEncode(data, data_len, NULL) == 0);
+    mu_assert("should return 0 (NULL data)", cobsEncode(NULL, data_len, encode_buffer, false) == 0);
+    mu_assert("should return 0 (NULL buffer)", cobsEncode(data, data_len, NULL, false) == 0);
 
     return 0;
 }
