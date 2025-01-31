@@ -97,6 +97,40 @@ size_t cobsInPlaceEncode(uint8_t *data, size_t length, bool trailing_zero)
     return length;
 }
 
+/** COBS decode (encoded)data to buffer
+ * @param data Pointer to input data to decode
+ * @param length Number of bytes to decode
+ * @param data Pointer to decoded output data
+ * @return Number of bytes successfully decoded (0 returned on error)
+ * @note Stops decoding if delimiter byte is found
+ * @note can't differentiate between error and empty data (when encoded data is {0x01})
+*/
+size_t cobsDecode(const uint8_t *data, size_t length, uint8_t *buffer)
+{
+	if((data==NULL) || (buffer==NULL)){
+		return 0;
+	}
+
+	const uint8_t *byte = data;			 // Encoded input byte pointer
+	uint8_t *decode = (uint8_t *)buffer; // Decoded output byte pointer
+
+	for (uint8_t code = 0xff, block = 0; byte < data + length; --block)
+	{
+		if (block) // Decode block byte
+			*decode++ = *byte++;
+		else
+		{
+			if (code != 0xff) // Encoded zero, write it
+				*decode++ = 0;
+			block = code = *byte++; // Next block length
+			if (code == 0x00)		// Delimiter code found
+				break;
+		}
+	}
+
+	return decode - (uint8_t *)buffer;
+}
+
 /** Inplace decoding of COBS (encoded)data
  * @param data Pointer to input data to decode
  * @param length Number of bytes to decode
